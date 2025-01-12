@@ -206,7 +206,7 @@ regions = {"Africa": ["af", "am", "ar", "ha", "sn", "so", "sw", "yo", "xh", "zu"
 
 
 # Array of executable names in priority order
-executables = ["./main", "whisper-cpp", "pwcpp", "whisper"]
+executables = ["./whisper-cli", "whisper-cpp", "pwcpp", "whisper"]
 
 # Function to find and select executable
 def find_and_select_executable():

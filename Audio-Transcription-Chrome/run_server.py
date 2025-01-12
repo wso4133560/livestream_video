@@ -32,7 +32,7 @@ if __name__ == "__main__":
     #server.client_manager.max_clients = 100
 
     server.run(
-        "127.0.0.1",
+        "0.0.0.0",
         port=args.port,
         backend=args.backend,
         faster_whisper_custom_model_path=args.faster_whisper_custom_model_path,

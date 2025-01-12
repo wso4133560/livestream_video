@@ -86,7 +86,7 @@ check_requirements()
     # Find and select executable
 
     # Array of executable names in priority order
-    executables=("./main" "whisper-cpp" "pwcpp" "whisper")
+    executables=("./whisper-cli" "whisper-cpp" "pwcpp" "whisper")
 
     # Loop through each executable name
     for exe in "${executables[@]}"; do
@@ -116,7 +116,7 @@ check_requirements()
     fi
     if [[ "$whisper_executable" == "whisper" && ! -f "./models/${model}.pt" ]]; then
       echo "Please wait until the model file is downloaded for first time."
-      whisper --threads 4 --model ${model} --model_dir ./models /tmp/whisper-live_${mypid}.wav > /dev/null 2> /tmp/whisper-live_${mypid}-err.err
+      whisper --threads 32 --model ${model} --model_dir ./models /tmp/whisper-live_${mypid}.wav > /dev/null 2> /tmp/whisper-live_${mypid}-err.err
     fi
 }
 
@@ -490,8 +490,8 @@ if [[ $subtitles == "subtitles" ]] && [[ $local -eq 1 ]]; then
     err=$?
 
     if [ $err -eq 0 ]; then
-        if [[ "$whisper_executable" == "./main" ]] || [[ "$whisper_executable" == "whisper-cpp" ]]; then
-            "$whisper_executable" -l ${language} ${translate} -t 4 -m ./models/ggml-${model}.bin -f /tmp/whisper-live_${mypid}.wav -osrt 2> /tmp/whisper-live_${mypid}-err.err
+        if [[ "$whisper_executable" == "./whisper-cli" ]] || [[ "$whisper_executable" == "whisper-cpp" ]]; then
+            "$whisper_executable" -l ${language} ${translate} -t 16 -m ./models/ggml-${model}.bin -f /tmp/whisper-live_${mypid}.wav -osrt 2> /tmp/whisper-live_${mypid}-err.err
             err=$?
         elif [[ "$whisper_executable" == "pwcpp" ]]; then
             if [[ "$translate" == "translate" ]]; then
@@ -504,18 +504,18 @@ if [[ $subtitles == "subtitles" ]] && [[ $local -eq 1 ]]; then
         elif [[ "$whisper_executable" == "whisper" ]]; then
             if [[ "$translate" == "translate" ]]; then
                 if [[ "$language" == "auto" ]]; then
-                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 4 --model ${model} --task translate --model_dir ./models --output_format srt --output_dir /tmp /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err
+                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 32 --model ${model} --task translate --model_dir ./models --output_format srt --output_dir /tmp /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err
                     err=$?
                 else
-                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 4 --model ${model} --task translate --model_dir ./models --output_format srt --output_dir /tmp /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err
+                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 32 --model ${model} --task translate --model_dir ./models --output_format srt --output_dir /tmp /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err
                     err=$?
                 fi
             else
                 if [[ "$language" == "auto" ]]; then
-                      whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 4 --model ${model} --model_dir ./models --output_format srt --output_dir /tmp /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err
+                      whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 32 --model ${model} --model_dir ./models --output_format srt --output_dir /tmp /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err
                       err=$?
                 else
-                      whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --language ${language} --threads 4 --model ${model} --model_dir ./models --output_format srt --output_dir /tmp /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err
+                      whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --language ${language} --threads 32 --model ${model} --model_dir ./models --output_format srt --output_dir /tmp /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err
                       err=$?
                 fi
             fi
@@ -843,8 +843,8 @@ if [[ $timeshift == "timeshift" ]] && [[ $local -eq 0 ]]; then
 
                   fi
 
-                  if [[ "$whisper_executable" == "./main" ]] || [[ "$whisper_executable" == "whisper-cpp" ]]; then
-                      "$whisper_executable" -l ${language} ${translate} -t 4 -m ./models/ggml-${model}.bin -f /tmp/whisper-live_${mypid}.wav --no-timestamps -otxt 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/output-whisper-live_${mypid}.txt >/dev/null
+                  if [[ "$whisper_executable" == "./whisper-cli" ]] || [[ "$whisper_executable" == "whisper-cpp" ]]; then
+                      "$whisper_executable" -l ${language} ${translate} -t 16 -m ./models/ggml-${model}.bin -f /tmp/whisper-live_${mypid}.wav --no-timestamps -otxt 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/output-whisper-live_${mypid}.txt >/dev/null
                       err=$?
                   elif [[ "$whisper_executable" == "pwcpp" ]]; then
                       if [[ "$translate" == "translate" ]]; then
@@ -857,18 +857,18 @@ if [[ $timeshift == "timeshift" ]] && [[ $local -eq 0 ]]; then
                   elif [[ "$whisper_executable" == "whisper" ]]; then
                       if [[ "$translate" == "translate" ]]; then
                           if [[ "$language" == "auto" ]]; then
-                              whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 4 --model ${model} --task translate --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
+                              whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 32 --model ${model} --task translate --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
                               err=$?
                           else
-                              whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 4 --model ${model} --task translate --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
+                              whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 32 --model ${model} --task translate --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
                               err=$?
                           fi
                       else
                           if [[ "$language" == "auto" ]]; then
-                                whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 4 --model ${model} --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
+                                whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 32 --model ${model} --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
                                 err=$?
                           else
-                                whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --language ${language} --threads 4 --model ${model} --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
+                                whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --language ${language} --threads 32 --model ${model} --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
                                 err=$?
                           fi
                       fi
@@ -876,7 +876,7 @@ if [[ $timeshift == "timeshift" ]] && [[ $local -eq 0 ]]; then
                   fi
 
                   if [[ $output_text == "original" ]] || [[ $output_text == "both" ]] || [[ $trans == "" ]]; then
-                      cat /tmp/output-whisper-live_${mypid}.txt | tee -a /tmp/transcription-whisper-live_${mypid}.txt
+                      cat /tmp/output-whisper-live_${mypid}.txt | tee -a /tmp/transcription-whisper-live_${mypid}.txt | tee -a ./whisper-live.txt
                   else
                       cat /tmp/output-whisper-live_${mypid}.txt >> /tmp/transcription-whisper-live_${mypid}.txt
                   fi
@@ -1055,8 +1055,8 @@ elif [[ $timeshift == "timeshift" ]] && [[ $local -eq 1 ]]; then # local video f
 
                         fi
 
-                        if [[ "$whisper_executable" == "./main" ]] || [[ "$whisper_executable" == "whisper-cpp" ]]; then
-                            "$whisper_executable" -l ${language} ${translate} -t 4 -m ./models/ggml-${model}.bin -f /tmp/whisper-live_${mypid}.wav --no-timestamps -otxt 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/output-whisper-live_${mypid}.txt >/dev/null
+                        if [[ "$whisper_executable" == "./whisper-cli" ]] || [[ "$whisper_executable" == "whisper-cpp" ]]; then
+                            "$whisper_executable" -l ${language} ${translate} -t 16 -m ./models/ggml-${model}.bin -f /tmp/whisper-live_${mypid}.wav --no-timestamps -otxt 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/output-whisper-live_${mypid}.txt >/dev/null
                             err=$?
                         elif [[ "$whisper_executable" == "pwcpp" ]]; then
                             if [[ "$translate" == "translate" ]]; then
@@ -1069,18 +1069,18 @@ elif [[ $timeshift == "timeshift" ]] && [[ $local -eq 1 ]]; then # local video f
                         elif [[ "$whisper_executable" == "whisper" ]]; then
                             if [[ "$translate" == "translate" ]]; then
                                 if [[ "$language" == "auto" ]]; then
-                                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 4 --model ${model} --task translate --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
+                                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 32 --model ${model} --task translate --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
                                     err=$?
                                 else
-                                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 4 --model ${model} --task translate --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
+                                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 32 --model ${model} --task translate --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
                                     err=$?
                                 fi
                             else
                                 if [[ "$language" == "auto" ]]; then
-                                      whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 4 --model ${model} --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
+                                      whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 32 --model ${model} --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
                                       err=$?
                                 else
-                                      whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --language ${language} --threads 4 --model ${model} --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
+                                      whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --language ${language} --threads 32 --model ${model} --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
                                       err=$?
                                 fi
                             fi
@@ -1088,7 +1088,7 @@ elif [[ $timeshift == "timeshift" ]] && [[ $local -eq 1 ]]; then # local video f
                         fi
 
                         if [[ $output_text == "original" ]] || [[ $output_text == "both" ]] || [[ $trans == "" ]]; then
-                            cat /tmp/output-whisper-live_${mypid}.txt | tee -a /tmp/transcription-whisper-live_${mypid}.txt
+                            cat /tmp/output-whisper-live_${mypid}.txt | tee -a /tmp/transcription-whisper-live_${mypid}.txt | tee -a ./whisper-live.txt
                         else
                             cat /tmp/output-whisper-live_${mypid}.txt >> /tmp/transcription-whisper-live_${mypid}.txt
                         fi
@@ -1426,8 +1426,8 @@ elif [[ "$playeronly" == "" ]]; then # No timeshift
             sleep 0.5
         done
 
-        if [[ "$whisper_executable" == "./main" ]] || [[ "$whisper_executable" == "whisper-cpp" ]]; then
-            "$whisper_executable" -l ${language} ${translate} -t 4 -m ./models/ggml-${model}.bin -f /tmp/whisper-live_${mypid}.wav --no-timestamps -otxt 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/output-whisper-live_${mypid}.txt >/dev/null
+        if [[ "$whisper_executable" == "./whisper-cli" ]] || [[ "$whisper_executable" == "whisper-cpp" ]]; then
+            "$whisper_executable" -l ${language} ${translate} -t 16 -m ./models/ggml-${model}.bin -f /tmp/whisper-live_${mypid}.wav --no-timestamps -otxt 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/output-whisper-live_${mypid}.txt >/dev/null
             err=$?
         elif [[ "$whisper_executable" == "pwcpp" ]]; then
             if [[ "$translate" == "translate" ]]; then
@@ -1440,18 +1440,18 @@ elif [[ "$playeronly" == "" ]]; then # No timeshift
         elif [[ "$whisper_executable" == "whisper" ]]; then
             if [[ "$translate" == "translate" ]]; then
                 if [[ "$language" == "auto" ]]; then
-                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 4 --model ${model} --task translate --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
+                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 32 --model ${model} --task translate --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
                     err=$?
                 else
-                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 4 --model ${model} --task translate --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
+                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 32 --model ${model} --task translate --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
                     err=$?
                 fi
             else
               if [[ "$language" == "auto" ]]; then
-                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 4 --model ${model} --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
+                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --threads 32 --model ${model} --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
                     err=$?
               else
-                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --language ${language} --threads 4 --model ${model} --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
+                    whisper --temperature 0 --beam_size 8 --best_of 4 --initial_prompt "" --language ${language} --threads 32 --model ${model} --model_dir ./models --output_dir /tmp --output_format txt /tmp/whisper-live_${mypid}.wav 2> /tmp/whisper-live_${mypid}-err.err | tail -n 1 | tr -d '<>^*_' | tee /tmp/aout-whisper-live_${mypid}.txt >/dev/null
                     err=$?
               fi
             fi
@@ -1459,7 +1459,7 @@ elif [[ "$playeronly" == "" ]]; then # No timeshift
         fi
 
         if [[ $output_text == "original" ]] || [[ $output_text == "both" ]] || [[ $trans == "" ]]; then
-            cat /tmp/output-whisper-live_${mypid}.txt | tee -a /tmp/transcription-whisper-live_${mypid}.txt
+            cat /tmp/output-whisper-live_${mypid}.txt | tee -a /tmp/transcription-whisper-live_${mypid}.txt | tee -a ./whisper-live.txt
         else
             cat /tmp/output-whisper-live_${mypid}.txt >> /tmp/transcription-whisper-live_${mypid}.txt
         fi

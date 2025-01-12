@@ -28,8 +28,8 @@ if __name__ == "__main__":
             raise ValueError("Please Provide a valid tensorrt model path")
 
     server = TranscriptionServer()
-    server.client_manager.max_connection_time = 540000
-    server.client_manager.max_clients = 100
+    #server.client_manager.max_connection_time = 540000
+    #server.client_manager.max_clients = 100
 
     server.run(
         "127.0.0.1",
